@@ -146,13 +146,49 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         let node = createText(text: text)
         
+        node.position = SCNVector3(self.hitTestResult.worldTransform.columns.3.x, self.hitTestResult.worldTransform.columns.3.y, self.hitTestResult.worldTransform.columns.3.z)
+        
+        self.sceneView.scene.rootNode.addChildNode(node)
+        
     }
     
     
     private func createText(text: String) -> SCNNode{
         
+        //Parent Node and Material
         let parentNode = SCNNode()
+        let material = SCNMaterial()
+        material.diffuse.contents = UIColor.red
         
+        //Setting up Sphere Node
+        let sphere = SCNSphere(radius: 0.01)
+        sphere.materials = [material]
+        let sphereNode = SCNNode(geometry: sphere)
+        
+        //Setting up Text
+        let textGeometry = SCNText(string: text, extrusionDepth: 0)
+        textGeometry.alignmentMode = CATextLayerAlignmentMode.center.rawValue
+        textGeometry.firstMaterial?.diffuse.contents = UIColor.orange
+        textGeometry.materials = [material]
+        textGeometry.firstMaterial?.specular.contents = UIColor.white
+        textGeometry.firstMaterial?.isDoubleSided = true
+        
+        //Setting up Font for 3d Text
+        let font = UIFont(name: "Futura", size: 0.15)
+        textGeometry.font = font
+        
+        //Setting up textNode
+        let textNode = SCNNode(geometry: textGeometry)
+        textNode.scale = SCNVector3Make(0.2, 0.2, 0.2)
+        
+        //To make the Text node always face the camera's direction
+        let billBoardConstraint = SCNBillboardConstraint()
+        billBoardConstraint.freeAxes = SCNBillboardAxis.Y
+        
+        //Adding all the nodes into the scene once tapped.
+        parentNode.addChildNode(textNode)
+        parentNode.addChildNode(sphereNode)
+        parentNode.constraints = [billBoardConstraint]
         return parentNode
     }
     
